@@ -1,0 +1,56 @@
+// ==========================================================
+// firestore.rules
+// ==========================================================
+// انسخ المحتوى ده وحطه في:
+// Firebase Console > Firestore Database > Rules
+// ==========================================================
+
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ---- Users ----
+    match /users/{userId} {
+      // أي حد مسجل دخول يقدر يقرا بيانات أي يوزر (مطلوب للوحة الترتيب)
+      allow read: if request.auth != null;
+
+      // اليوزر يقدر يعمل بروفايله بس وقت التسجيل
+      allow create: if request.auth != null && request.auth.uid == userId;
+
+      // التحديثات (زي خصم/إضافة النقاط) المفروض تتم عن طريق Cloud Functions
+      // في النسخة دي البسيطة، بنسمح بالتحديث من الكلاينت نفسه أو الأدمن
+      allow update: if request.auth != null &&
+                    (request.auth.uid == userId ||
+                     get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true);
+
+      allow delete: if false;
+    }
+
+    // ---- Matches ----
+    match /matches/{matchId} {
+      // أي حد مسجل دخول يقدر يشوف الماتشات
+      allow read: if request.auth != null;
+
+      // بس الأدمن يقدر يضيف/يعدل/يحذف ماتشات
+      allow create, update, delete: if request.auth != null &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true;
+    }
+
+    // ---- Bets ----
+    match /bets/{betId} {
+      // اليوزر يشوف رهاناته بس، والأدمن يشوف الكل
+      allow read: if request.auth != null;
+
+      // اليوزر يقدر يضيف رهان لنفسه بس
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+
+      // تحديث حالة الرهان (won/lost) بيتم من الأدمن وقت توزيع النقاط
+      allow update: if request.auth != null &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true;
+
+      allow delete: if request.auth != null &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true;
+    }
+  }
+}

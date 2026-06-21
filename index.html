@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>دوري التسلية</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="auth-wrapper">
+  <div class="auth-card">
+
+    <!-- ===== فورم تسجيل الدخول ===== -->
+    <div id="loginForm">
+      <h1>دوري التسلية 🏆</h1>
+      <p class="subtitle">سجّل دخولك وادخل المنافسة</p>
+
+      <div class="error-msg" id="errorMsg"></div>
+
+      <form onsubmit="handleLogin(event)">
+        <div class="form-group">
+          <label>الإيميل</label>
+          <input type="email" id="loginEmail" placeholder="example@email.com" required>
+        </div>
+        <div class="form-group">
+          <label>كلمة السر</label>
+          <input type="password" id="loginPassword" placeholder="••••••••" required>
+        </div>
+        <button type="submit" class="btn-primary" id="loginBtn">دخول</button>
+      </form>
+
+      <p class="switch-link">
+        لسه معملتش حساب؟ <a onclick="toggleForms()">سجّل دلوقتي</a>
+      </p>
+    </div>
+
+    <!-- ===== فورم إنشاء حساب ===== -->
+    <div id="signupForm" class="hidden">
+      <h1>انضم للدوري 🎮</h1>
+      <p class="subtitle">اعمل حساب وابدأ بـ <strong id="startPointsLabel"></strong> نقطة</p>
+
+      <div class="error-msg" id="errorMsgSignup"></div>
+
+      <form onsubmit="handleSignup(event)">
+        <div class="form-group">
+          <label>الاسم</label>
+          <input type="text" id="signupName" placeholder="اسمك" required>
+        </div>
+        <div class="form-group">
+          <label>الإيميل</label>
+          <input type="email" id="signupEmail" placeholder="example@email.com" required>
+        </div>
+        <div class="form-group">
+          <label>كلمة السر</label>
+          <input type="password" id="signupPassword" placeholder="6 حروف على الأقل" required minlength="6">
+        </div>
+        <button type="submit" class="btn-primary" id="signupBtn">إنشاء حساب</button>
+      </form>
+
+      <p class="switch-link">
+        عندك حساب؟ <a onclick="toggleForms()">سجّل دخولك</a>
+      </p>
+    </div>
+
+  </div>
+</div>
+
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+<script src="js/firebase-config.js"></script>
+<script src="js/auth.js"></script>
+<script>
+  document.getElementById('startPointsLabel').textContent = APP_CONFIG.startingPoints;
+
+  function toggleForms() {
+    document.getElementById('loginForm').classList.toggle('hidden');
+    document.getElementById('signupForm').classList.toggle('hidden');
+  }
+
+  // لو المستخدم مسجل دخول بالفعل، يروح على الداشبورد
+  auth.onAuthStateChanged(user => {
+    if (user) window.location.href = 'dashboard.html';
+  });
+</script>
+
+</body>
+</html>

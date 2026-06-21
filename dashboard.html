@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>دوري التسلية - الرئيسية</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo">دوري التسلية 🏆</div>
+  <div class="user-info">
+    <a href="admin.html" id="adminLink" class="btn btn-secondary btn-sm hidden">لوحة الأدمن</a>
+    <div class="points-badge">⭐ <span id="userPoints">0</span></div>
+    <span id="userName" style="font-size:14px; color:var(--text-secondary);"></span>
+    <button class="btn-secondary btn-sm" onclick="handleLogout()">خروج</button>
+  </div>
+</div>
+
+<div class="container">
+
+  <div class="tabs">
+    <div class="tab active" id="tab-matches" onclick="switchTab('matches')">الماتشات</div>
+    <div class="tab" id="tab-leaderboard" onclick="switchTab('leaderboard')">لوحة الترتيب</div>
+  </div>
+
+  <div id="content-matches" class="tab-content">
+    <div id="matchesContainer" class="matches-grid"></div>
+  </div>
+
+  <div id="content-leaderboard" class="tab-content hidden">
+    <div id="leaderboardContainer"></div>
+  </div>
+
+</div>
+
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+<script src="js/firebase-config.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/matches.js"></script>
+<script>
+  requireAuth(async (user) => {
+    await loadUserHeader(user);
+    await loadMatches();
+  });
+</script>
+
+</body>
+</html>
