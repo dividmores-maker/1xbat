@@ -44,23 +44,34 @@ async function handleSignup(e) {
   btn.disabled = true;
   btn.textContent = 'جاري إنشاء الحساب...';
 
+  let createdUid = null;
+
   try {
     const cred = await auth.createUserWithEmailAndPassword(email, password);
-    const uid = cred.user.uid;
+    createdUid = cred.user.uid;
 
     // إنشاء بروفايل اليوزر في Firestore برصيد البداية
-    await db.collection('users').doc(uid).set({
-      name: name,
-      email: email,
-      points: APP_CONFIG.startingPoints,
-      wins: 0,
-      losses: 0,
-      isAdmin: email.toLowerCase() === APP_CONFIG.adminEmail.toLowerCase(),
-      createdAt: firebase.firestore.FieldValue.serverTimestamp()
-    });
+    try {
+      await db.collection('users').doc(createdUid).set({
+        name: name,
+        email: email,
+        points: APP_CONFIG.startingPoints,
+        wins: 0,
+        losses: 0,
+        isAdmin: email.toLowerCase() === APP_CONFIG.adminEmail.toLowerCase(),
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+    } catch (firestoreErr) {
+      console.error('فشل حفظ بيانات اليوزر في Firestore:', firestoreErr);
+      showError('اتعمل الحساب في نظام الدخول بس فشل حفظ بياناتك في قاعدة البيانات. السبب الأرجح: قواعد الأمان (Firestore Rules) لسه مش متظبطة صح. التفاصيل: ' + firestoreErr.message);
+      btn.disabled = false;
+      btn.textContent = 'إنشاء حساب';
+      return;
+    }
 
     window.location.href = 'dashboard.html';
   } catch (err) {
+    console.error('فشل إنشاء الحساب:', err);
     showError(translateError(err.code));
     btn.disabled = false;
     btn.textContent = 'إنشاء حساب';
@@ -119,8 +130,13 @@ function requireAdmin(callback) {
       return;
     }
     const userDoc = await db.collection('users').doc(user.uid).get();
+    if (!userDoc.exists) {
+      console.warn('بيانات اليوزر مش موجودة في Firestore - هيتم تحويله للداشبورد');
+      window.location.href = 'dashboard.html';
+      return;
+    }
     const userData = userDoc.data();
-    if (!userData || !userData.isAdmin) {
+    if (!userData.isAdmin) {
       window.location.href = 'dashboard.html';
       return;
     }

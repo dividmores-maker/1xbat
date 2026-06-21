@@ -21,6 +21,14 @@ function showToast(message, type = 'success') {
 async function loadUserHeader(user) {
   currentUser = user;
   const userDoc = await db.collection('users').doc(user.uid).get();
+
+  if (!userDoc.exists) {
+    alert('حصلت مشكلة: بيانات حسابك مش موجودة في قاعدة البيانات. هيتم تسجيل خروجك، حاول تعمل حساب جديد.');
+    await auth.signOut();
+    window.location.href = 'index.html';
+    return;
+  }
+
   currentUserData = userDoc.data();
 
   document.getElementById('userName').textContent = currentUserData.name;
